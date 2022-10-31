@@ -16,12 +16,14 @@
 				</h1>
 			</v-col>
 		</v-row>
-    <v-row class="text-center">
+		<v-row class="text-center">
 			<v-col class="mb-4">
-				<v-btn @click="login" color="success" :loading="loading1">{{ wallet_name }}</v-btn>
+				<v-btn @click="login" color="success" :loading="loading1">{{
+					wallet_name
+				}}</v-btn>
 			</v-col>
 
-      <v-col class="mb-4">
+			<v-col class="mb-4">
 				<v-btn @click="logout" color="error">Logout</v-btn>
 			</v-col>
 		</v-row>
@@ -43,13 +45,20 @@
 			</v-col>
 		</v-row>
 		<v-row class="text-center">
-			<v-col class="mb-12">
-				<v-btn
-					@click="withdraw_storage"
-          :loading="loading4"
-					color="primary"
+			<v-col class="mb-6">
+				<v-btn @click="withdraw_storage" :loading="loading4" color="primary"
 					>Withdraw</v-btn
 				>
+			</v-col>
+      <v-col class="mb-6">
+				<input
+          style="border-color: black"
+					v-model="myname"
+				/>
+				<v-btn @click="hello_name_language"  color="primary"
+					>Call Hello</v-btn
+				>
+        <h3>{{ myname_result }}</h3>
 			</v-col>
 		</v-row>
 	</v-container>
@@ -70,33 +79,33 @@
 			loading1: false,
 			loading2: false,
 			loading3: false,
-      loading4: false,
+			loading4: false,
 			sum_values: "",
-			wallet_name: localStorage.getItem('user'),
-      myname: ""
+			wallet_name: localStorage.getItem("user"),
+			myname: "",
+      myname_result: ""
 		}),
 		mounted() {
 			this.get_get_sum_of_deposits();
-      this.get_user();
+			this.get_user();
 		},
 		methods: {
 			async login() {
-        this.loading1 = true;
+				this.loading1 = true;
 				// connect to NEAR
 				const near = await connect(
 					CONFIG(new keyStores.BrowserLocalStorageKeyStore())
 				);
 				const wallet = new WalletConnection(near);
 				// wallet.requestSignIn(CONTRACT_NAME);
-        wallet.requestSignIn({
+				wallet.requestSignIn({
 					contractId: CONTRACT_NAME,
 					methodNames: [], // optional
 					successUrl: "http://localhost:8080/", // optional redirect URL on success
 					failureUrl: "http://localhost:8080/", // optional redirect URL on failure
 				});
-				
 			},
-      async logout() {
+			async logout() {
 				// connect to NEAR
 				const near = await connect(
 					CONFIG(new keyStores.BrowserLocalStorageKeyStore())
@@ -104,8 +113,8 @@
 				const wallet = new WalletConnection(near);
 				// wallet.requestSignIn(CONTRACT_NAME);
 				wallet.signOut();
-        localStorage.setItem('user', "LOGIN");
-        window.location = "http://localhost:8080/"
+				localStorage.setItem("user", "LOGIN");
+				window.location = "http://localhost:8080/";
 			},
 			async get_get_sum_of_deposits() {
 				this.loading2 = true;
@@ -122,13 +131,14 @@
 					sender: wallet.account(),
 				});
 				if (wallet.isSignedIn()) {
-					this.sum_values = await contract.get_sum_of_deposits() / 1000000000000000000000000;
+					this.sum_values =
+						(await contract.get_sum_of_deposits()) / 1000000000000000000000000;
 					console.log(this.sum_values);
 				}
 				this.loading2 = false;
 			},
 			async deposit_to_storage() {
-        this.get_user();
+				this.get_user();
 				this.loading3 = true;
 				const near = await connect(
 					CONFIG(new keyStores.BrowserLocalStorageKeyStore())
@@ -151,7 +161,7 @@
 				}
 				this.loading3 = false;
 			},
-      async withdraw_storage() {
+			async withdraw_storage() {
 				this.loading4 = true;
 				const near = await connect(
 					CONFIG(new keyStores.BrowserLocalStorageKeyStore())
@@ -168,11 +178,29 @@
 				if (wallet.isSignedIn()) {
 					await contract.withdraw_storage(
 						{},
-						"300000000000000", // attached GAS (optional)
+						"300000000000000" // attached GAS (optional)
 					);
 				}
 				this.loading4 = false;
-        this.get_get_sum_of_deposits();
+				this.get_get_sum_of_deposits();
+			},
+      async hello_name_language() {
+				const near = await connect(
+					CONFIG(new keyStores.BrowserLocalStorageKeyStore())
+				);
+				// create wallet connection
+				// const account = await near.account();
+				const wallet = new WalletConnection(near);
+				// console.log(near);
+        const contract = new Contract(wallet.account(), CONTRACT_NAME, {
+					viewMethods: [],
+					changeMethods: ["hello_name_language"],
+					sender: wallet.account(),
+				});
+
+				if (wallet.isSignedIn()) {
+					this.myname_result = await contract.hello_name_language( {name : this.myname})
+				}
 			},
 			async get_user() {
 				const near = await connect(

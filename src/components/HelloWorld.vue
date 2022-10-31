@@ -50,7 +50,7 @@
 	import * as nearAPI from "near-api-js";
 	import { CONFIG } from "@/services/api";
 	const { connect, keyStores, WalletConnection, Contract } = nearAPI;
-	const CONTRACT_NAME = "dev-1666893761778-74129794828107";
+	const CONTRACT_NAME = "dev-1666979301533-26368053949992";
 	// @ts-ignore
 	window.Buffer = Buffer;
 	export default {
@@ -105,12 +105,12 @@
 				const wallet = new WalletConnection(near);
 				// console.log(near);
 				const contract = new Contract(wallet.account(), CONTRACT_NAME, {
-					viewMethods: ["get_get_sum_of_deposits"],
+					viewMethods: ["get_sum_of_deposits"],
 					changeMethods: [],
 					sender: wallet.account(),
 				});
 				if (wallet.isSignedIn()) {
-					this.sum_values = await contract.get_get_sum_of_deposits() / 1000000000000000000000000;
+					this.sum_values = await contract.get_sum_of_deposits() / 1000000000000000000000000;
 					console.log(this.sum_values);
 				}
 				this.loading2 = false;

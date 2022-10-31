@@ -42,6 +42,16 @@
 				>
 			</v-col>
 		</v-row>
+		<v-row class="text-center">
+			<v-col class="mb-12">
+				<v-btn
+					@click="withdraw_storage"
+          :loading="loading4"
+					color="primary"
+					>Withdraw</v-btn
+				>
+			</v-col>
+		</v-row>
 	</v-container>
 </template>
 
@@ -57,15 +67,17 @@
 		name: "HellNear",
 
 		data: () => ({
-			whatsNext: [],
 			loading1: false,
 			loading2: false,
 			loading3: false,
+      loading4: false,
 			sum_values: "",
 			wallet_name: localStorage.getItem('user'),
+      myname: ""
 		}),
 		mounted() {
 			this.get_get_sum_of_deposits();
+      this.get_user();
 		},
 		methods: {
 			async login() {
@@ -138,6 +150,29 @@
 					);
 				}
 				this.loading3 = false;
+			},
+      async withdraw_storage() {
+				this.loading4 = true;
+				const near = await connect(
+					CONFIG(new keyStores.BrowserLocalStorageKeyStore())
+				);
+				// create wallet connection
+				// const account = await near.account();
+				const wallet = new WalletConnection(near);
+				// console.log(near);
+				const contract = new Contract(wallet.account(), CONTRACT_NAME, {
+					viewMethods: [],
+					changeMethods: ["withdraw_storage"],
+					sender: wallet.account(),
+				});
+				if (wallet.isSignedIn()) {
+					await contract.withdraw_storage(
+						{},
+						"300000000000000", // attached GAS (optional)
+					);
+				}
+				this.loading4 = false;
+        this.get_get_sum_of_deposits();
 			},
 			async get_user() {
 				const near = await connect(
